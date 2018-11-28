@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Backuper.fs" />
+    <Compile Include="Program.fs" />
+    <Compile Include="Cataloguer.fs" />
+    
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="$(FsharpMyExtension)" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
