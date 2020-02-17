@@ -13,13 +13,3 @@ let rec extract path =
         |> Array.fold (fun st x ->
             Map.add (System.IO.Path.GetFileName x) (extract x) st) Map.empty
     Dir(sub, Array.map System.IO.Path.GetFileName files)
-// open FsharpMyExtension
-// let xs = extract @"e:\Project"
-
-// xs
-// |> Json.serfNotIdent "output\\output.json"
-
-
-// extract @"c:\Users\Default\Application Data"
-// System.IO.Directory.EnumerateFiles @"c:\Users\Default\Application Data"
-// System.IO.Directory.EnumerateFiles @"c:\Users\Все пользователи"
