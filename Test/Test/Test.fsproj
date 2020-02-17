@@ -1,7 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Cataloguer\Cataloguer\Cataloguer.fsproj">
@@ -14,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Runtime" />
-	<Reference Include="E:\Project\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension\bin\Debug\net45\FsharpMyExtension.dll" />
+    <Reference Include="$(FsharpMyExtension)" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

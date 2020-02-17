@@ -393,3 +393,5 @@ paket-files/
 *.sln.iml
 
 Output/
+
+.paket/load

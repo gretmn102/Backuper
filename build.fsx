@@ -15,7 +15,7 @@ let testPath = !! "**/test.fsproj" |> Seq.tryHead
 // --------------------------------------------------------------------------------------
 open Fake.DotNet
 let buildConf = DotNet.BuildConfiguration.Debug
-let dotnetSdk = lazy DotNet.install DotNet.Versions.Release_2_1_4
+let dotnetSdk = lazy DotNet.install DotNet.Versions.Release_2_1_402
 let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 
 // --------------------------------------------------------------------------------------

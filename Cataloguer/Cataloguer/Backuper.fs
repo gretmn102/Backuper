@@ -1,5 +1,8 @@
 module Backuper
 open FsharpMyExtension
+// Идея такая: берем папку и все содержимое, согласно внутренним '.gitignore', перебрасываем в другую папку.
+// Вроде неплохо. Осталось только понять, как работает '.gitignore'
+
 // нужна программа для резервирования проектов.
 // как я это вижу:
 // берем указанную папку, и согласно внутренним файлам ".gitignore", записываем в другое место.
@@ -179,7 +182,7 @@ let gitignoreLoad path : GitignoreRules =
             System.Text.RegularExpressions.Regex(patt, System.Text.RegularExpressions.RegexOptions.IgnoreCase)))
     includes, excludes
 
-module V1 = 
+module V1 =
     let extract (dir : string) =
         let isMatch startat input =
             // let r = System.Text.RegularExpressions.Regex("sdf")
@@ -276,22 +279,32 @@ module V2 =
                     |> List.consFlip st) [] ds
                     |> Seq.concat
             }
-    let extract (dir : string) =
-        let isMatch startat input =
-            // let r = System.Text.RegularExpressions.Regex("sdf")
-            List.exists (fun (x:System.Text.RegularExpressions.Regex) ->
-                // // x.IsMatch(input, startat) // почему не так? Если образец начинается на "^", то при любом аргументе `startat` кроме 0, выбивает false. Грустно не правда ли?
-                // // зато ппи следующем раскладе все нормально.
-                // // try
-                // // x.Match(input, startat, input.Length - startat)
-                // // |> fun x -> x.Success
-                // // with e -> failwithf "%A\n%s" x input
-                // // Если не это повод спиться, то я уже не знаю что тогда.
-                x.IsMatch(input, startat)
-            )
+    let isMatch startat input =
+        // let r = System.Text.RegularExpressions.Regex("sdf")
+        List.exists (fun (x:System.Text.RegularExpressions.Regex) ->
+            // // x.IsMatch(input, startat) // почему не так? Если образец начинается на "^", то при любом аргументе `startat` кроме 0, выбивает false. Грустно не правда ли?
+            // // зато ппи следующем раскладе все нормально.
+            // // try
+            // // x.Match(input, startat, input.Length - startat)
+            // // |> fun x -> x.Success
+            // // with e -> failwithf "%A\n%s" x input
+            // // Если не это повод спиться, то я уже не знаю что тогда.
+            x.IsMatch(input, startat)
+        )
+    /// всегда учитывает папку ".git"
+    let extract2 (includesf, excludesf) (dir:System.IO.DirectoryInfo) =
+        let rec enumerateWithoutRules (dir:System.IO.DirectoryInfo) =
+            let files =
+                dir.EnumerateFiles()
+                |> Seq.fold (fun st x -> Map.add x.Name x.LastWriteTime st ) Map.empty
+            let dirs =
+                dir.EnumerateDirectories()
+                |> Seq.fold (fun st dir -> Map.add dir.Name (enumerateWithoutRules dir) st) Map.empty
+            T(dirs, files)
+
         let rec f ((includesf, excludesf):(string -> bool) * (string -> bool)) (dir:System.IO.DirectoryInfo) =
             let files =
-                dir.GetFiles "*"
+                dir.GetFiles()
                 |> Array.fold (fun st x ->
                     let path = x.FullName
                     if not (excludesf path) || includesf path then
@@ -300,43 +313,70 @@ module V2 =
                         st
                     ) Map.empty
             let dirs =
-                dir.GetDirectories "*"
+                dir.GetDirectories()
                 |> Array.fold (fun st dir ->
-                    let path = dir.FullName
-                    if not (excludesf path) || includesf path then
-                        let x =
-                            let gitignorePath = path + "\\.gitignore"
-                            // printfn "%s" gitignorePath
-                            if System.IO.File.Exists gitignorePath then
-                                // printfn "true"
-                                // let dir = dir.Name
-                                let startat = dir.FullName.Length
-                                let includes, excludes = gitignoreLoad gitignorePath
-                                let excludesf input = isMatch startat input excludes
-                                let includesf input = isMatch startat input includes
-                                f (includesf, excludesf) dir
-                            else
-                                f (includesf, excludesf) dir
-                        let (T(ds, fs)) = x
-                        if Map.isEmpty ds && Map.isEmpty fs then st
-                        else
-                            Map.add dir.Name x st
+                    if dir.Name = ".git" then
+                            // seq{
+                            //     yield! System.IO.Directory.GetFiles path
+                            //     yield! System.IO.Directory.GetDirectories path
+                            //            |> Array.map f |> Seq.concat
+                            // }
+                        let x = enumerateWithoutRules dir
+                        Map.add dir.Name x st
                     else
-                        st
-                    ) Map.empty
+                        let path = dir.FullName
+                        if not (excludesf path) || includesf path then
+                            let x =
+                                let gitignorePath = path + "\\.gitignore"
+                                // printfn "%s" gitignorePath
+                                if System.IO.File.Exists gitignorePath then
+                                    // printfn "true"
+                                    // let dir = dir.Name
+                                    let startat = dir.FullName.Length
+                                    let includes, excludes = gitignoreLoad gitignorePath
+                                    let excludesf input = isMatch startat input excludes
+                                    let includesf input = isMatch startat input includes
+                                    f (includesf, excludesf) dir
+                                else
+                                    f (includesf, excludesf) dir
+                            let (T(ds, fs)) = x
+                            if Map.isEmpty ds && Map.isEmpty fs then st
+                            else
+                                Map.add dir.Name x st
+                        else
+                            st
+                ) Map.empty
             T(dirs, files)
+        f (includesf, excludesf) dir
+    let extract (dir : string) =
         let dirPath = dir.TrimEnd [| '\\' |]
         let dir = System.IO.DirectoryInfo dirPath
         let gitignorePath = dirPath + "\\.gitignore"
-        if System.IO.File.Exists gitignorePath then
-            let startat = dirPath.Length
-            let includes, excludes = gitignoreLoad gitignorePath
-            let excludesf input = isMatch startat input excludes
-            let includesf input = isMatch startat input includes
-            f (includesf, excludesf) dir
-        else
-            failwith "not found global .gitignore"
+        let includes, excludes =
+            if System.IO.File.Exists gitignorePath then
+                gitignoreLoad gitignorePath
+            else
+                [], []
+                // failwith "not found global .gitignore"
+        let startat = dirPath.Length
+        let excludesf input = isMatch startat input excludes
+        let includesf input = isMatch startat input includes
+        extract2 (includesf, excludesf) dir
+    // let extractWithoutGitIgnore (dir : string) =
+    //     let dirPath = dir.TrimEnd [| '\\' |]
+    //     let dir = System.IO.DirectoryInfo dirPath
+    //     let startat = dirPath.Length
+    //     let includes, excludes = [], []
+    //     let excludesf input = isMatch startat input excludes
+    //     let includesf input = isMatch startat input includes
+    //     extract2 (includesf, excludesf) dir
 
+    // let extractMany (dirs : string list) =
+    //     // let m =
+    //     //     dirs |> Seq.fold (fun st x ->
+    //     //                 Map.add x (extractWithoutGitIgnore x) st ) Map.empty
+    //     // T(m, Map.empty)
+    //     dirs |> List.map extract
     type Ty =
         | NotChanged
         | Added
@@ -438,56 +478,64 @@ module V2 =
                 Map.add dirName res ds
             ) ds
         Diff(ds, fs)
-    
-    let withoutReadOnly att =
+
+    let setAttributeNotReadOnly att =
         // I have some doubts about this, but whatever.
         if System.IO.FileAttributes.ReadOnly = (att &&& System.IO.FileAttributes.ReadOnly) then
             att ^^^ System.IO.FileAttributes.ReadOnly
         else att
-    let rec apply srcDir dstDir (Diff(ds, fs)) =
+    let rec apply deleteNonexistent srcDir dstDir (Diff(ds, fs)) =
         let combine = sprintf "%s\\%s"
-        let fs = 
+        let fs =
             fs |> Map.choose (fun fileName ((lastWriteOld, ty) as v) ->
                 match ty with
                 | NotChanged -> Some v
                 | Added
-                | Changed -> 
+                | Changed ->
                     let src = combine srcDir fileName
                     let dst = combine dstDir fileName
-                    
+
                     let dstf = System.IO.FileInfo dst
                     if dstf.Exists then
-                        dstf.Attributes <- withoutReadOnly dstf.Attributes
+                        dstf.Attributes <- setAttributeNotReadOnly dstf.Attributes
 
                     System.IO.File.Copy(src, dst, true)
                     Some v
                 | Removed ->
                     let src = combine srcDir fileName
                     let dst = combine dstDir fileName
-                    
+
                     let dstf = System.IO.FileInfo dst
                     if dstf.Exists then
-                        dstf.Attributes <- withoutReadOnly dstf.Attributes
-
-                    let srcf = new System.IO.FileInfo(src)
-                    if srcf.Exists then
-                        let lastWriteNew = srcf.LastWriteTime
-                        if lastWriteNew = lastWriteOld then
-                            Some v
-                        else
-                            srcf.CopyTo(dst, true) |> ignore
-                            Some(lastWriteNew, ty)
-                    else
-                        if dstf.Exists then
-                            dstf.Delete()
+                        dstf.Attributes <- setAttributeNotReadOnly dstf.Attributes
+                    // // так работает нормальный .git:
+                    // let srcf = new System.IO.FileInfo(src)
+                    // if srcf.Exists then
+                    //     let lastWriteNew = srcf.LastWriteTime
+                    //     if lastWriteNew = lastWriteOld then
+                    //         Some v
+                    //     else
+                    //         srcf.CopyTo(dst, true) |> ignore
+                    //         Some(lastWriteNew, ty)
+                    // else
+                    //     if deleteNonexistent then
+                    //         if dstf.Exists then dstf.Delete()
+                    //         None
+                    //     else
+                    //         Some v
+                    // // но нам, стало быть, такое не надо.
+                    if deleteNonexistent then
+                        if dstf.Exists then dstf.Delete()
                         None
+                    else
+                        Some v
             )
-        let ds = 
+        let ds =
             ds |> Map.map (fun dirName ->
                 let src = combine srcDir dirName
                 let dst = combine dstDir dirName
                 let dir = System.IO.Directory.CreateDirectory dst
-                apply src dst
+                apply deleteNonexistent src dst
             )
         Diff(ds, fs)
 let test2 () =
@@ -510,24 +558,63 @@ let test2 () =
     // |>
     ()
 open V2
-let start () =
-    let srcDir = @"e:\Project"
-    let dstDir = @"h:\FromFlashCard\Backup"
+
+let start srcDir dstDir =
+    // let srcDir = @"e:\All2\Projects"
+    // let dstDir = @"h:\ProjectsBackup"
+    System.IO.Directory.CreateDirectory dstDir |> ignore
     let mouldPath = dstDir + "\\mould.json"
-    
-    let mould : T = Json.desf mouldPath
-    printfn "собираю слепок из %s..." srcDir
-    let mouldNew = extract srcDir
-    printfn "собрал"
-    let diff =  diff mouldNew mould
-    // diff |> Json.serf "output\\output.json"
-    printfn "применяю разницу слепков..."
-    let diff = apply srcDir dstDir diff
-    printfn "применил"
+    printfn "build mould from %s..." srcDir
+    let mouldNew = V2.extract srcDir
+    printfn "built"
+    let mouldOld = V2.T(Map.empty, Map.empty)
+    let diff = V2.diff mouldNew mouldOld
+    let diff = V2.apply true srcDir dstDir diff
     let mould = Diff.toT diff
     Json.serfNotIdent mouldPath mould
+// start @"e:\Disc D\All" @"h:\AllBackup"
+// let startMany () =
+//     let srcDir = @"e:\Project"
+//     let dstDir = @"g:\Notes\New"
+//     let mouldPath = dstDir + "\\mould.json"
+//     let mould = V2.extractMany [ @"d:\Chief\Cataloguer"; @"d:\Chief\ServerSamopal"]
+//     let mouldNew = V2.T(Map.empty, Map.empty)
+//     let diff = V2.diff mould mouldNew
+//     let diff = V2.apply srcDir dstDir diff
+//     printfn "применил"
+//     let mould = Diff.toT diff
+//     Json.serfNotIdent mouldPath mould
+// start2()
+let startWithMould (srcDir, dstDir) =
+    // let srcDir = @"e:\Project"
+    // let dstDir = @"g:\Notes\ProjBackup"
+    let mouldPath = dstDir + "\\mould.json"
+    if System.IO.File.Exists mouldPath then
+        let mouldOld : T = Json.desf mouldPath
+        printfn "build mould from %s..." srcDir
+        let mouldNew = extract srcDir
+        printfn "built"
+        let diff = diff mouldNew mouldOld
+        // diff |> Json.serf "output\\output.json"
+        printfn "applying difference moulds..."
+        let diff = apply true srcDir dstDir diff
+        printfn "applied"
+        let mould = Diff.toT diff
+        Json.serfNotIdent mouldPath mould
+    else
+        printfn "'%s' not exists. Create? (y/n)" mouldPath
+        let rec f () =
+            let k = System.Console.ReadKey()
+            match k.Key with
+            | System.ConsoleKey.Y ->
+                start srcDir dstDir
+            | System.ConsoleKey.N ->
+                printfn @"¯\_(ツ)_/¯"
+            | x ->
+                printf "expected 'y' or 'n' but '%A'. Try again." x
+                f()
+        f()
 
-start()
 let test3 () =
     // let srcDir = @"e:\Project"
     // let dstDir = @"h:\FromFlashCard\Backup"
@@ -554,16 +641,14 @@ let test3 () =
     // System.IO.File.Copy(src, dst, true)
     // System.IO.File.GetAttributes dst
     // let file = System.IO.FileInfo dst
-    
+
     // file.Attributes <- file.Attributes ^^^ System.IO.FileAttributes.ReadOnly
     // file.Delete()
     // System.IO.File.Delete dst
-    // let src = @"e:\Project\Parsers\KrkrToRenpy\.git\objects\0d\88885260999731a79da2386e703fc1e5d9395c"
-    // let dst = @"h:\FromFlashCard\Backup\Parsers\KrkrScenarioParser\.git\objects\5c\43691fb4af308a8ddce55d57cf1abba22c1619"
 
     // dstf.Attributes <- System.IO.FileAttributes.ReadOnly ^^^ dstf.Attributes
     // srcf.CopyTo(dst, true)
-    
+
     // // let x = System.IO.File.GetAccessControl dst
     // // x.SetAccessRule
     // System.IO.File.Copy(src, dst, true)
