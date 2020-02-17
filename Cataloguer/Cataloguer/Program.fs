@@ -2,10 +2,6 @@
 // type T2 = File | Dir
 type File = string
 type T =
-    //| Dir of Map<string, T array * File array>
-    //| File of string
-    //| Node of T2 * string
-    //| Dir2 of string * (T array * File array)
     | Dir of Map<string,T> * File array
 
 
