@@ -6,9 +6,8 @@
     <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Backuper.fs" />
+    <Compile Include="Core.fs" />
     <Compile Include="Program.fs" />
-    <Compile Include="Cataloguer.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>

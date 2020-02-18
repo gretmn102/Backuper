@@ -6,8 +6,8 @@
     <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Cataloguer\Cataloguer\Cataloguer.fsproj">
-      <Name>Cataloguer.fsproj</Name>
+    <ProjectReference Include="..\..\Backuper\Backuper\Backuper.fsproj">
+      <Name>Backuper.fsproj</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
