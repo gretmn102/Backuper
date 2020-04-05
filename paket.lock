@@ -7,3 +7,22 @@ NUGET
     FSharp.Core (4.7)
     Fuchu (1.0.3)
       FSharp.Core (>= 3.1.2.1)
+    HtmlAgilityPack (1.11.23)
+    Newtonsoft.Json (12.0.3)
+    Newtonsoft.Json.Bson (1.0.2)
+      Newtonsoft.Json (>= 12.0.1)
+    YamlDotNet (8.1)
+  remote: paket-files/github.com/gretmn102/FsharpMyExtension/FsharpMyExtension/FsharpMyExtension/bin/Release
+    FSharpMyExt (1.0.0)
+      FParsec (>= 1.0.3)
+      FSharp.Core (>= 4.6)
+      Fuchu (>= 1.0.3)
+      HtmlAgilityPack (>= 1.11.12)
+      Newtonsoft.Json (>= 12.0.2)
+      Newtonsoft.Json.Bson (>= 1.0.2)
+      YamlDotNet (>= 6.1.2)
+GIT
+  remote: https://github.com/gretmn102/FsharpMyExtension.git
+     (163990845e998be6096578e3188e926b7d55c1d7)
+      build: build.cmd NuGet
+      path: /FsharpMyExtension/FsharpMyExtension/bin/Release/

@@ -1,7 +1,11 @@
+storage: none // https://fsprojects.github.io/Paket/dependencies-file.html#Disable-packages-folder
 source https://www.nuget.org/api/v2
-
 framework: >= net461
 nuget FAKE
 nuget FParsec
 nuget FSharp.Core
 nuget Fuchu
+
+git https://github.com/gretmn102/FsharpMyExtension.git build:"build.cmd NuGet", Packages: /FsharpMyExtension/FsharpMyExtension/bin/Release/
+nuget FsharpMyExt
+// source https://nuget.pkg.github.com/gretmn102/index.json username: "gretmn102" password: "" authtype: "basic"
