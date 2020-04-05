@@ -492,49 +492,67 @@ module V2 =
                 | NotChanged -> Some v
                 | Added
                 | Changed ->
+                    try
+                        System.IO.Directory.CreateDirectory dstDir |> ignore
+                    with
+                        e -> printfn "%A\n%A" (srcDir, dstDir) e.Message
+
                     let src = combine srcDir fileName
                     let dst = combine dstDir fileName
+                    try
+                        let dstf = System.IO.FileInfo dst
+                        if dstf.Exists then
+                            dstf.Attributes <- setAttributeNotReadOnly dstf.Attributes
 
-                    let dstf = System.IO.FileInfo dst
-                    if dstf.Exists then
-                        dstf.Attributes <- setAttributeNotReadOnly dstf.Attributes
-
-                    System.IO.File.Copy(src, dst, true)
+                        try
+                            System.IO.File.Copy(src, dst, true)
+                        with e ->
+                            printfn "%A\n%A" (src, dst) e.Message
+                    with e ->
+                        printfn "%A\n%A" (src, dst) e.Message
                     Some v
                 | Removed ->
+                    try
+                        System.IO.Directory.CreateDirectory dstDir |> ignore
+                    with
+                        e -> printfn "%A\n%A" (srcDir, dstDir) e.Message
+
                     let src = combine srcDir fileName
                     let dst = combine dstDir fileName
-
-                    let dstf = System.IO.FileInfo dst
-                    if dstf.Exists then
-                        dstf.Attributes <- setAttributeNotReadOnly dstf.Attributes
-                    // // так работает нормальный .git:
-                    // let srcf = new System.IO.FileInfo(src)
-                    // if srcf.Exists then
-                    //     let lastWriteNew = srcf.LastWriteTime
-                    //     if lastWriteNew = lastWriteOld then
-                    //         Some v
-                    //     else
-                    //         srcf.CopyTo(dst, true) |> ignore
-                    //         Some(lastWriteNew, ty)
-                    // else
-                    //     if deleteNonexistent then
-                    //         if dstf.Exists then dstf.Delete()
-                    //         None
-                    //     else
-                    //         Some v
-                    // // но нам, стало быть, такое не надо.
-                    if deleteNonexistent then
-                        if dstf.Exists then dstf.Delete()
-                        None
-                    else
+                    try
+                        let dstf = System.IO.FileInfo dst
+                        if dstf.Exists then
+                            dstf.Attributes <- setAttributeNotReadOnly dstf.Attributes
+                        // // так работает нормальный .git:
+                        // let srcf = new System.IO.FileInfo(src)
+                        // if srcf.Exists then
+                        //     let lastWriteNew = srcf.LastWriteTime
+                        //     if lastWriteNew = lastWriteOld then
+                        //         Some v
+                        //     else
+                        //         srcf.CopyTo(dst, true) |> ignore
+                        //         Some(lastWriteNew, ty)
+                        // else
+                        //     if deleteNonexistent then
+                        //         if dstf.Exists then dstf.Delete()
+                        //         None
+                        //     else
+                        //         Some v
+                        // // но нам, стало быть, такое не надо.
+                        if deleteNonexistent then
+                            if dstf.Exists then dstf.Delete()
+                            None
+                        else
+                            Some v
+                    with e ->
+                        printfn "%A\n%A" (src, dst) e.Message
                         Some v
             )
         let ds =
             ds |> Map.map (fun dirName ->
                 let src = combine srcDir dirName
                 let dst = combine dstDir dirName
-                let dir = System.IO.Directory.CreateDirectory dst
+
                 apply deleteNonexistent src dst
             )
         Diff(ds, fs)
