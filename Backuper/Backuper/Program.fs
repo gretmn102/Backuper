@@ -1,10 +1,13 @@
 module Cataloguer
 #if INTERACTIVE
-#load "Backuper.fs"
+#load "Core.fs"
 #endif
 open FsharpMyExtension
 let test () =
-    let xs = Backuper.V2.extract @"E:\Sandbox\User\DefaultBox\drive\E\renpy"
+    System.Environment.CurrentDirectory <- @"e:\Project\Template" // __SOURCE_DIRECTORY__
+    let srcDir = @"Src"
+    let srcDir = System.IO.Path.GetFullPath srcDir
+    let xs = Backuper.V2.extract srcDir
     xs |> FsharpMyExtension.Json.serf "output\\output.json"
     let oldMouldPath = @"h:\RenpyBackup\mould.json"
     let oldMould : Backuper.V2.T = Json.desf oldMouldPath
@@ -19,17 +22,26 @@ type T = (string * string) list
 
 [<EntryPoint>]
 let main argv =
-    let path = "input.json"
-    if System.IO.File.Exists path then
-        try
-            let xs:T = Json.desf path
-            xs |> List.iter Backuper.startWithMould
-            0
-        with e ->
-            printfn "%A" e
+    match argv with
+    | [||] ->
+        let path = "input.json"
+        if System.IO.File.Exists path then
+            try
+                let xs:T = Json.desf path
+                xs |> List.iter Backuper.startWithMould
+                0
+            with e ->
+                printfn "%A" e
+                System.Console.ReadKey() |> ignore
+                -1
+        else
+            printfn "not found %A" path
             System.Console.ReadKey() |> ignore
             -1
-    else
-        printfn "not found %A" path
-        System.Console.ReadKey() |> ignore
+    | [|srcDir; dstDir|] ->
+        let xs:T = [srcDir, dstDir]
+        xs |> List.iter Backuper.startWithMould
+        0
+    | _ ->
+        printfn "empty args or <srcDir> <dstDir>"
         -1

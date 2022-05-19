@@ -493,6 +493,7 @@ module V2 =
                 | Added
                 | Changed ->
                     try
+                        // TODO: make sure that the folder is created only once, and not for every changed file, as it is now
                         System.IO.Directory.CreateDirectory dstDir |> ignore
                     with
                         e -> printfn "%A\n%A" (srcDir, dstDir) e.Message
@@ -603,9 +604,10 @@ let start srcDir dstDir =
 //     let mould = Diff.toT diff
 //     Json.serfNotIdent mouldPath mould
 // start2()
-let startWithMould (srcDir, dstDir) =
+let startWithMould paths =
     // let srcDir = @"e:\Project"
     // let dstDir = @"g:\Notes\ProjBackup"
+    let srcDir, dstDir = mapBoth System.IO.Path.GetFullPath paths
     let mouldPath = dstDir + "\\mould.json"
     if System.IO.File.Exists mouldPath then
         let mouldOld : T = Json.desf mouldPath
