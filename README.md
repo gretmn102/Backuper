@@ -6,19 +6,25 @@
 Очень просто: достаточно создать в корневой папке файл "input.json" примерно с таким содержанием:
 ```json
 [
-    {
-      "Item1": "c:\\Project\\Project1",
-      "Item2": "d:\\Project1Backup"
-    },
-    {
-      "Item1": "c:\\Project\\Project2",
-      "Item2": "d:\\Project2Backup"
-    }
+  {
+    "Item1": "c:\\Project\\Project1",
+    "Item2": "d:\\Project1Backup"
+  },
+  {
+    "Item1": "c:\\Project\\Project2",
+    "Item2": "d:\\Project2Backup"
+  }
 ]
 ```
 
-# Требование для запуска
-* .NET версии >= 4.6
+## Установка
+* Для Windows запустить build.cmd
+* Для Linux запустить build.sh
+* Либо же вручную прописать команды:
+    ```
+    dotnet tool restore
+    dotnet fake build
+    ```
 
 # Известные проблемы
 * Неизвестно общее время работы программы. Нет ползунка прогресса, нет ничего.

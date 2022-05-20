@@ -1,16 +1,23 @@
 storage: none
 source https://www.nuget.org/api/v2
 framework: >= net461
-nuget FAKE
 nuget FParsec
-nuget FSharp.Core
+nuget FSharp.Core 4.7.2
 nuget Fuchu
 
-git https://github.com/gretmn102/FsharpMyExtension.git build:"build.cmd NuGet", Packages: /FsharpMyExtension/FsharpMyExtension/bin/Release/
-nuget FsharpMyExt
-// source https://nuget.pkg.github.com/gretmn102/index.json username: "gretmn102" password: "" authtype: "basic"
+git https://github.com/gretmn102/FsharpMyExtension.git master build: "build.cmd", OS: windows
+git https://github.com/gretmn102/FsharpMyExtension.git master build: "build.sh", OS: mono
+
+nuget System.Runtime.CompilerServices.Unsafe 5.0.0
+nuget System.Security.Cryptography.ProtectedData 5.0.0
 
 group Build
-  source https://nuget.org/api/v2
+    source https://api.nuget.org/v3/index.json
+    framework: netstandard2.0
+    storage: none
+    strategy: min
 
-  nuget FAKE
+    nuget FSharp.Core 4.7.2
+    nuget Fake.Core.Target
+    nuget Fake.DotNet.Cli
+    nuget Fake.IO.FileSystem
