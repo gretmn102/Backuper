@@ -13,17 +13,17 @@ type Typ =
 type Rule =
     {
         /// то правило, которое без `!` в начале.
-        Include:bool
-        Body : Typ list
+        Include: bool
+        Body: Typ list
     }
 
 module Parser =
     open FParsec
 
-    let comment : Parser<unit, unit> =
+    let comment: Parser<unit, unit> =
         pchar '#' >>. skipManySatisfy ((<>) '\n') >>. spaces
-    let rule : Parser<Rule, unit> =
-        let mask : Parser<string,unit> =
+    let rule: Parser<Rule, unit> =
+        let mask: Parser<string,unit> =
             many1Satisfy (fun x -> x <> '/' && x <> '\n') <?> "mask"
 
         let subrules =
@@ -64,7 +64,7 @@ module Parser =
 /// * `.` -> `\.`
 /// * `[]` -> так и будет
 /// * `**` -> `.*?` наверное
-let ruleToRegexPattern (x:Rule) =
+let ruleToRegexPattern (x: Rule) =
     let toRegex =
         List.map (
             function
@@ -96,7 +96,7 @@ type GitignoreRules =
     System.Text.RegularExpressions.Regex list *
     System.Text.RegularExpressions.Regex list
 
-let gitignoreLoad path : GitignoreRules =
+let gitignoreLoad path: GitignoreRules =
     let includes, excludes =
         Parser.startFile path
         |> List.map ruleToRegexPattern
