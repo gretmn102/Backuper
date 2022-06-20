@@ -7,11 +7,11 @@ let test () =
     System.Environment.CurrentDirectory <- @"e:\Project\Template" // __SOURCE_DIRECTORY__
     let srcDir = @"Src"
     let srcDir = System.IO.Path.GetFullPath srcDir
-    let xs = Backuper.V2.extract srcDir
+    let xs = Backuper.extract srcDir
     xs |> FsharpMyExtension.Json.serf "output\\output.json"
     let oldMouldPath = @"h:\RenpyBackup\mould.json"
-    let oldMould : Backuper.V2.T = Json.desf oldMouldPath
-    Backuper.V2.diff xs oldMould
+    let oldMould : Backuper.T = Json.desf oldMouldPath
+    Backuper.diff xs oldMould
     |> Json.serf "output\\diff.json"
 
 // Итак. Что здесь видеть?
