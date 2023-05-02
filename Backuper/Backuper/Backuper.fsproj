@@ -8,7 +8,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GitIgnore.fs" />
-    <Compile Include="Core.fs" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="DirTree.fs" />
+    <Compile Include="DirDiffTree.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
