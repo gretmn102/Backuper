@@ -8,7 +8,7 @@ let start srcDir dstDir =
     // todo: use `System.IO.Path.Combine`
     let mouldPath = dstDir + "\\mould.json"
     printfn "build mould from %s..." srcDir
-    let mouldNew = DirTree.extract srcDir
+    let mouldNew = DirTree.build srcDir
     printfn "built"
     let mouldOld = DirTree(Map.empty, Map.empty)
     let diff = DirDiffTree.diff mouldNew mouldOld
@@ -23,7 +23,7 @@ let startWithMould paths =
     if System.IO.File.Exists mouldPath then
         let mouldOld: DirTree = Json.desf mouldPath
         printfn "build mould from %s..." srcDir
-        let mouldNew = DirTree.extract srcDir
+        let mouldNew = DirTree.build srcDir
         printfn "built"
         let diff = DirDiffTree.diff mouldNew mouldOld
         printfn "applying difference moulds..."

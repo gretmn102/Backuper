@@ -75,7 +75,7 @@ module DirTree =
 
         DirTree(dirs, files)
 
-    let extract (dir: string) =
+    let build (dir: string) =
         let dirPath = dir.TrimEnd [| '\\' |]
         let dir = System.IO.DirectoryInfo dirPath
         let gitIgnorePath = dirPath + "\\.gitignore"
