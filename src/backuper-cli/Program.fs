@@ -1,7 +1,7 @@
 module Cataloguer
 open FsharpMyExtension
 
-open Backuper
+open Backuper.Core
 
 let start srcDir dstDir =
     System.IO.Directory.CreateDirectory dstDir |> ignore

@@ -1,4 +1,4 @@
-namespace Backuper
+namespace Backuper.Core
 type FileName = string
 type DirName = string
 type LastWriteTime = System.DateTime

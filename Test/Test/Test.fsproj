@@ -7,8 +7,8 @@
     <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\backuper-cli\backuper-cli.fsproj">
-      <Name>backuper-cli.fsproj</Name>
+    <ProjectReference Include="..\..\src\Backuper.Core\Backuper.Core.fsproj">
+      <Name>Backuper.Core.fsproj</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

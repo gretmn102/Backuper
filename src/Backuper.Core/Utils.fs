@@ -1,4 +1,4 @@
-module Backuper.Utils
+module Backuper.Core.Utils
 [<RequireQualifiedAccess>]
 module FileAttributes =
     let setNotReadOnly att =

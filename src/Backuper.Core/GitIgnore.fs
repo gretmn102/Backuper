@@ -1,4 +1,4 @@
-namespace Backuper.Git
+namespace Backuper.Core.Git
 open FsharpMyExtension
 open FsharpMyExtension.Either
 

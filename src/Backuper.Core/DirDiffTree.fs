@@ -1,4 +1,4 @@
-namespace Backuper
+namespace Backuper.Core
 [<Struct>]
 type DiffType =
     | NotChanged
