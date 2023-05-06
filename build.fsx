@@ -17,8 +17,8 @@ open Fake.Core.TargetOperators
 let testProjName = "Test"
 let testProjDir = "Test/Test"
 let testProjPath = sprintf "%s/%s.fsproj" testProjDir testProjName
-let mainProjName = "Backuper"
-let mainProjPath = sprintf "Backuper/Backuper/%s.fsproj" mainProjName
+let mainProjName = "backuper-cli"
+let mainProjPath = sprintf "src/backuper-cli/%s.fsproj" mainProjName
 // --------------------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------------------
