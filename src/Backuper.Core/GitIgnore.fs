@@ -19,6 +19,12 @@ type Rule =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Rule =
+    let empty: Rule =
+        {
+            IsInclude = false
+            Body = []
+        }
+
     module Parser =
         open FParsec
 
