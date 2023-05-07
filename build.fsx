@@ -23,8 +23,8 @@ let f projName =
         |> failwithf "'%s' expected exactly one but:\n%A" pattern
     )
 
-let testProjName = "Test"
-let testProjPath = sprintf "Test/Test/%s.fsproj" testProjName
+let testProjName = "Tests"
+let testProjPath = sprintf "tests/%s.fsproj" testProjName
 let testProjDir = Path.getDirectory testProjPath
 let cliProjName = "backuper-cli"
 let cliProjPath = f cliProjName
